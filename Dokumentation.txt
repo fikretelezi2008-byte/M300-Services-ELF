@@ -187,3 +187,400 @@ Zusätzlich in .gitignore:
 9. VM löschen
 exit
 vagrant destroy -f
+
+#Automatisierung eines Webservers mit Apache & Webalizer mittels Vagrant#
+
+1. Erstellung einer neuen Test-VM
+1.1 Projektverzeichnis erstellen
+
+Zuerst wird ein neues Projektverzeichnis für die VM erstellt:
+
+cd myM300/
+mkdir myVM
+cd myVM
+
+1.2 Initialisierung des Vagrantfiles
+
+Im Projektordner wird ein neues Vagrantfile mit einer Ubuntu 16.04 Box erstellt:
+
+vagrant init ubuntu/xenial64
+
+1.3 Starten der virtuellen Maschine
+
+Die VM wird mit folgendem Befehl gestartet:
+
+vagrant up
+
+1.4 Verbindung zur VM herstellen
+
+Nach dem Start wird eine SSH-Verbindung zur VM aufgebaut:
+
+vagrant ssh
+
+2. Installation der benötigten Serverdienste
+2.1 Aktualisieren der Paketquellen
+
+Vor jeder Installation werden die Ubuntu-Paketquellen aktualisiert:
+
+sudo apt-get update
+
+2.2 Installation des Apache Webservers
+
+Apache wird installiert, um einen Webserver zur Verfügung zu stellen:
+
+sudo apt-get install -y apache2
+
+2.3 Installation von Webalizer
+
+Webalizer wird installiert, um Webserver-Zugriffe statistisch auszuwerten:
+
+sudo apt-get install -y webalizer
+
+3. Portweiterleitung (Problem B)
+3.1 Ursache des Problems
+
+Der Apache-Webserver läuft in der VM auf Port 80 und ist vom Host aus nicht erreichbar, da keine Portweiterleitung existiert.
+
+3.2 Lösung: Port-Forwarding im Vagrantfile
+
+Im Vagrantfile wird eine Portweiterleitung konfiguriert:
+
+config.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
+
+
+Nach der Änderung wird die VM neu geladen:
+
+exit
+vagrant reload
+
+3.3 Test
+
+Der Webserver ist nun über den Browser erreichbar:
+
+http://localhost:8080
+
+4. Erzeugen von Webserver-Traffic
+4.1 Ursache
+
+Webalizer wertet nur archivierte Apache-Logs aus.
+Dazu muss zuerst Web-Traffic erzeugt werden.
+
+4.2 Traffic erzeugen (in der VM!)
+
+Die folgenden Befehle werden in der VM ausgeführt:
+
+curl http://localhost/ >/dev/null 2>&1
+curl http://localhost/ >/dev/null 2>&1
+curl http://localhost/ >/dev/null 2>&1
+curl http://localhost/ >/dev/null 2>&1
+curl http://localhost/bad >/dev/null 2>&1
+
+5. Logrotation & Webalizer-Auswertung
+5.1 Apache Logs rotieren
+
+Da Webalizer nur rotierte Logs auswertet, wird Logrotate manuell ausgeführt:
+
+sudo logrotate -f /etc/logrotate.d/apache2
+
+5.2 Korrektur des Output-Verzeichnisses
+
+Das Standard-Output-Verzeichnis von Webalizer wird angepasst:
+
+sudo sed -i 's:/var/www/webalizer:/var/www/html/webalizer:' /etc/webalizer/webalizer.conf
+sudo mkdir -p /var/www/html/webalizer
+
+5.3 Webalizer manuell ausführen
+
+Die Statistik wird manuell erzeugt:
+
+sudo /etc/cron.daily/webalizer
+
+5.4 Überprüfung der Ausgabe
+
+Prüfen, ob Webalizer HTML-Dateien erzeugt hat:
+
+ls /var/www/html/webalizer
+
+6. Automatisierung mit Vagrant Provisioning
+6.1 Ziel
+
+Alle vorherigen manuellen Schritte sollen automatisch beim Start der VM ausgeführt werden.
+
+6.2 Vollständiges Vagrantfile
+Vagrant.configure(2) do |config|
+  config.vm.box = "ubuntu/xenial64"
+
+  config.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
+  config.vm.synced_folder ".", "/var/www/html"
+
+  config.vm.provider "virtualbox" do |vb|
+    vb.memory = "512"
+  end
+
+  config.vm.provision "shell", inline: <<-SHELL
+set -o xtrace
+
+sudo apt-get update
+sudo apt-get -y install apache2 webalizer
+
+curl http://localhost/ >/dev/null 2>&1
+curl http://localhost/ >/dev/null 2>&1
+curl http://localhost/bad >/dev/null 2>&1
+
+sudo sed -i 's:/var/www/webalizer:/var/www/html/webalizer:' /etc/webalizer/webalizer.conf
+sudo mkdir -p /var/www/html/webalizer
+
+sudo logrotate -f /etc/logrotate.d/apache2
+sudo /etc/cron.daily/webalizer
+SHELL
+
+end
+
+6.3 Neuaufbau der VM
+
+Zur Überprüfung der Automatisierung wird die VM neu erstellt:
+
+vagrant destroy -f
+vagrant up
+
+7. Endkontrolle
+7.1 Apache testen
+http://localhost:8080
+
+7.2 Webalizer testen
+http://localhost:8080/webalizer/
+
+8. Wichtige Erkenntnisse (LB2-relevant)
+
+Vagrant-Befehle werden immer auf dem Host ausgeführt
+
+curl localhost erzeugt nur dann Logs, wenn es in der VM läuft
+
+Webalizer benötigt:
+
+Traffic
+
+rotierte Logs
+
+korrektes Output-Verzeichnis
+
+Provisioning automatisiert reproduzierbare Server-Setups
+
+Cloud Computing
+Was versteht man unter Cloud Computing?
+
+Cloud Computing bedeutet, dass Programme und Dienste nicht auf dem eigenen Computer laufen, sondern auf anderen Rechnern.
+Auf diese Rechner greift man zum Beispiel über das Internet zu.
+
+Was versteht man unter Infrastructure as a Service (IaaS)?
+
+IaaS ist eine Form von Cloud Computing, bei der virtuelle Maschinen bereitgestellt werden.
+Der Benutzer verwaltet das Betriebssystem und die Software selbst.
+
+Infrastructure as Code
+Was ist der Unterschied zur manuellen Installation einer VM?
+
+Bei Infrastructure as Code wird alles automatisiert.
+Die Installation ist wiederholbar und dient gleichzeitig als Dokumentation.
+
+Vagrant
+Was wird mit Vagrant erzeugt?
+
+Mit Vagrant werden virtuelle Maschinen erstellt.
+
+Welche Aussage zu Vagrant ist richtig?
+
+Richtig ist:
+Vagrant erzeugt virtuelle Maschinen und unterstützt verschiedene Hypervisoren und Cloud-Umgebungen.
+
+In welchen Bereich des Cloud Computing gehört Vagrant?
+
+Vagrant gehört zum Bereich Infrastructure as a Service (IaaS).
+
+Welche Alternativen zu Vagrant gibt es?
+
+Es gibt verschiedene Alternativen zu Vagrant, zum Beispiel andere Tools zur Virtualisierung und Automatisierung.
+Eine Übersicht findet man auf entsprechenden Vergleichsseiten im Internet.
+
+Wo speichert Vagrant seine Konfiguration?
+
+Die Konfiguration von Vagrant wird im Vagrantfile gespeichert.
+
+Was bedeutet die Fehlermeldung
+
+„A Vagrant environment or target machine is required to run this command.“?
+Diese Meldung bedeutet, dass man sich im falschen Verzeichnis befindet.
+Im aktuellen Ordner gibt es kein Vagrantfile.
+
+Bei welcher LPI Zertifizierung ist Vagrant Wissen nützlich?
+
+Vagrant Wissen ist nützlich für die LPI DevOps Tools Engineer Zertifizierung.
+
+#25 Infrastruktur und Sicherheit#
+
+Schritt 1: Projekt vorbereiten
+
+Terminal öffnen
+
+In dein M300-Verzeichnis wechseln
+
+Neues Projektverzeichnis erstellen
+
+Vagrantfile initialisieren
+
+mkdir myVM
+cd myVM
+vagrant init ubuntu/xenial64
+
+Schritt 2: Virtuelle Maschine starten
+vagrant up
+vagrant ssh
+
+Schritt 3: Grundsystem konfigurieren
+
+In der VM:
+
+sudo apt-get update
+sudo apt-get install -y apache2
+sudo apt-get install -y webalizer
+
+Schritt 4: Portweiterleitung konfigurieren
+
+Im Vagrantfile:
+
+config.vm.network "forwarded_port", guest: 80, host: 8080, auto_correct: true
+
+
+Danach:
+
+vagrant reload
+
+Schritt 5: Web-Traffic erzeugen
+
+In der VM:
+
+curl http://localhost/ >/dev/null 2>&1
+curl http://localhost/bad >/dev/null 2>&1
+
+Schritt 6: Logs rotieren und Webalizer ausführen
+sudo logrotate -f /etc/logrotate.d/apache2
+sudo sed -i 's:/var/www/webalizer:/var/www/html/webalizer:' /etc/webalizer/webalizer.conf
+sudo mkdir -p /var/www/html/webalizer
+sudo /etc/cron.daily/webalizer
+
+Schritt 7: Firewall einrichten (UFW)
+sudo apt-get install ufw
+sudo ufw allow 80/tcp
+sudo ufw allow 22/tcp
+sudo ufw enable
+sudo ufw status
+
+Schritt 8: SSH absichern mit Key
+ssh-keygen -t rsa -b 4096
+ssh-copy-id vagrant@<vm-ip>
+
+Schritt 9: Alles automatisieren
+
+Alle Befehle in das Vagrantfile (Provisioning) übernehmen
+
+VM neu erstellen
+
+vagrant destroy -f
+vagrant up
+
+Schritt 10: Ergebnis prüfen
+
+Im Browser:
+
+http://localhost:8080
+http://localhost:8080/webalizer/
+
+Dokumentation – Infrastruktur-Automatisierung und Sicherheit
+1. Ausgangslage
+
+Ziel dieser Arbeit ist der Aufbau einer automatisierten und abgesicherten virtuellen Infrastruktur.
+Die Infrastruktur basiert auf virtuellen Maschinen, die reproduzierbar erstellt und konfiguriert werden.
+
+2. Cloud Computing
+
+Cloud Computing beschreibt die Nutzung von IT-Ressourcen über ein Netzwerk. Rechenleistung, Speicher und Software werden nicht lokal betrieben, sondern zentral bereitgestellt.
+
+Man unterscheidet:
+
+Infrastructure as a Service (virtuelle Maschinen)
+
+Platform as a Service (Plattform für Anwendungen)
+
+Software as a Service (fertige Anwendungen)
+
+3. Infrastructure as Code
+
+Infrastructure as Code beschreibt den Ansatz, Infrastruktur mit Konfigurationsdateien zu definieren.
+Dadurch werden Installationen wiederholbar, dokumentiert und automatisiert.
+
+Vorteile:
+
+Weniger manuelle Fehler
+
+Schnelle Wiederherstellung
+
+Einheitliche Systeme
+
+4. Vagrant
+
+Vagrant ist ein Werkzeug zur Erstellung und Verwaltung von virtuellen Maschinen.
+Die Konfiguration erfolgt über ein Vagrantfile, welches die gesamte Infrastruktur beschreibt.
+
+Zentrale Konzepte:
+
+Boxen als VM-Vorlagen
+
+Provisioning zur automatischen Installation
+
+Provider wie VirtualBox
+
+Synced Folders für gemeinsame Ordner
+
+5. Umsetzung der Infrastruktur
+
+Eine Ubuntu-VM wird mit Vagrant erstellt.
+Während der Provisionierung werden folgende Dienste installiert:
+
+Apache Webserver
+
+Webalizer zur Auswertung von Zugriffen
+
+Der Webserver wird über eine Portweiterleitung vom Host erreichbar gemacht.
+
+6. Webalizer Auswertung
+
+Damit Webalizer Daten anzeigen kann, wird Web-Traffic erzeugt.
+Apache-Logs werden rotiert und anschliessend ausgewertet.
+Die Statistiken werden als HTML-Seiten bereitgestellt.
+
+7. Firewall
+
+Zur Absicherung wird eine Firewall mit UFW eingesetzt.
+Es werden nur notwendige Ports geöffnet:
+
+Port 80 für HTTP
+
+Port 22 für SSH
+
+Alle anderen Zugriffe werden blockiert.
+
+8. SSH Sicherheit
+
+Der Zugriff auf die VM erfolgt über SSH.
+Zur Erhöhung der Sicherheit wird das Public-Key-Verfahren verwendet.
+Passwortbasierte Anmeldungen werden dadurch ersetzt.
+
+9. Automatisierung
+
+Alle Installations- und Konfigurationsschritte werden im Vagrantfile definiert.
+Die Infrastruktur kann jederzeit neu erstellt werden, ohne manuelle Eingriffe.
+
+10. Fazit
+
+Durch den Einsatz von Vagrant, Infrastructure as Code und Sicherheitsmechanismen konnte eine reproduzierbare, automatisierte und abgesicherte Infrastruktur aufgebaut werden.
+Der manuelle Aufwand wurde reduziert und die Stabilität erhöht.
