@@ -1,7 +1,6 @@
 Dokumentation.txt
 1. Ziel der Arbeit
-
-Ziel dieser Arbeit ist es, eine lokale Entwicklungs- und Testumgebung aufzubauen, in der virtuelle Maschinen automatisiert, konsistent und reproduzierbar erstellt werden.
+sZiel dieser Arbeit ist es, eine lokale Entwicklungs- und Testumgebung aufzubauen, in der virtuelle Maschinen automatisiert, konsistent und reproduzierbar erstellt werden.
 Dabei werden die theoretischen Konzepte der Infrastruktur-Automatisierung praktisch umgesetzt.
 
 2. Voraussetzungen
