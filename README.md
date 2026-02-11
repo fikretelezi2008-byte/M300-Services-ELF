@@ -89,19 +89,27 @@ Direkte Aufgaben sind nicht im Fliesstext enthalten, sondern befinden sich in:
 ```bash
 git config --global user.name "fikretelezi"
 git config --global user.email "fikretelezi2008@gmail.com"
+```
 *4.2 SSH-Key erstellen (GitHub)
+```bash
 ssh-keygen -t rsa -b 4096 -C "fikretelezi2008@gmail.com"
+```
 Der Public Key wurde zu GitHub hinzugefügt und erfolgreich getestet:
-
+```bash
 ssh -T git@github.com
+```
 4.3 Projektstruktur erstellen
-cd "/c/Users/Hans/OneDrive - Berufsbildungszentrum Schaffhausen/BBZ/Blockschule/300"
+```cd "/c/Users/Hans/OneDrive - Berufsbildungszentrum Schaffhausen/BBZ/Blockschule/300"
 mkdir -p vagrant/web
 cd vagrant/web
+```
 5. Apache Webserver automatisiert mit Vagrant
 5.1 Vagrantfile erstellen
+```bash
 vagrant init ubuntu/jammy64
+```
 5.2 Vagrantfile konfigurieren
+```bash
 Vagrant.configure("2") do |config|
   config.vm.box = "ubuntu/jammy64"
 
@@ -114,26 +122,40 @@ Vagrant.configure("2") do |config|
     systemctl start apache2
   SHELL
 end
-#VM starten
+```
+VM starten
+```bash
 vagrant up
-#Verbindung zur VM
+```
+Verbindung zur VM
+```bash
 vagrant ssh
+```
 6. Apache überprüfen
 6.1 Service-Status
+```bash
 sudo systemctl status apache2
 Ergebnis:
 
 Active: active (running)
-
+```
 6.2 Test mit curl
+```bash
 curl http://localhost
+```
 6.3 Test im Browser
+```bash
 http://127.0.0.1:8080
+```
 
 Die Apache-Standardseite wird angezeigt.
 S
+![Apachestandartfoto]("C:\Users\Hans\OneDrive - Berufsbildungszentrum Schaffhausen\Bilder\Screenshots\Screenshot 2026-02-09 130507.png")
+
 7. HTML-Titel anpassen
+```bash
 sudo nano /var/www/html/index.html
+```
 Änderung:
 
 <title>M300 – Apache Webserver</title>
