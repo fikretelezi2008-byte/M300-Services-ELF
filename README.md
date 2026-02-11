@@ -215,7 +215,7 @@ docker run -d --name adminer --network lb3net -p 8082:8080 adminer
 
 Ghost Webinterface:
 http://localhost:2368
-![Ghostwebfoto](images/ghost.png)
+![Ghostwebfoto](images/Ghost.png)
 Adminer Webinterface:
 http://localhost:8082
 ![Adminerfoto](images/Adminer.png)
