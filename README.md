@@ -218,7 +218,7 @@ http://localhost:2368
 ![Ghostwebfoto](images/Ghost.png)
 Adminer Webinterface:
 http://localhost:8082
-![Adminerfoto](images/Adminer.png)
+![Adminerfoto](images/Adminer.png)$
 Status prüfen:
 ```bash
 docker ps
@@ -301,8 +301,148 @@ ob der Apache-Webserver erreichbar ist.
 - Ressourcenbeschränkungen implementiert
 - Healthcheck integriert
 
-Alle Anforderungen von LB 3 hands-on wurden vollständig erfüllt.
 
+ 30 Container Zusammenfassung
+
+## Lernziel
+Applikationen und Services können als Container betrieben werden.
+Eigene Container können als Images gebaut und über Registries (z.B. Docker Hub oder private Registry) für Dritte bereitgestellt werden.
+
+## 1. Container
+Container ermöglichen es, Software in isolierten Umgebungen auszuführen.
+Sie laufen überall gleich: lokal, im Rechenzentrum oder in der Cloud.
+
+### Vorteile von Containern
+- Teilen Ressourcen mit dem Host-Betriebssystem
+- Sehr schnell start- und stoppbar
+- Kaum Overhead
+- Portierbar („läuft bei mir“-Problem entfällt)
+- Leichtgewichtig (viele Container parallel)
+- Cloud-ready
+
+### Microservices
+Container sind ideal für Microservices.
+Ein System besteht aus kleinen, unabhängigen Services, die über das Netzwerk kommunizieren.
+Diese können unabhängig entwickelt, deployt und horizontal skaliert werden (scale-out).
+
+## 2. Docker
+Docker ist eine Plattform zum Erstellen, Ausführen und Verteilen von Containern.
+
+### Architektur
+- Docker Daemon: baut Images, startet und überwacht Container
+- Docker Client: Kommandozeilen-Interface (CLI)
+- Images: unveränderbare Vorlagen für Container
+- Container: laufende Instanzen von Images
+- Registry: Speicher und Verteilung von Images (z.B. Docker Hub)
+
+## Wichtige Docker Befehle
+
+### Docker testen
+```bash
+docker run hello-world
+```
+### Container starten
+```bash
+docker run -it ubuntu /bin/bash
+docker run -d ubuntu sleep 20
+docker run -d --rm ubuntu sleep 20
+```
+### Container anzeigen
+```bash
+docker ps
+docker ps -a
+```
+### Images anzeigen
+```bash
+docker images
+docker image ls
+```
+### Container stoppen / starten
+```bash
+docker stop <container>
+docker start <container>
+docker kill <container>
+```
+### Container löschen
+```bash
+docker rm <container>
+docker rm -f `docker ps -a -q`
+```
+### Images löschen
+```bash
+docker rmi <image>
+docker rmi `docker images -q -f dangling=true`
+```
+### Logs und Informationen
+```bash
+docker logs <container>
+docker inspect <container>
+docker diff <container>
+docker top <container>
+```
+## Dockerfile
+Ein Dockerfile ist eine Textdatei mit Anweisungen zum Erstellen eines Docker Images.
+
+### Image bauen
+```bash
+docker build -t meinimage .
+```
+### Container starten
+```bash
+docker run --rm -d --name meincontainer meinimage
+```
+### Im Container prüfen
+```bash
+docker exec -it meincontainer bash
+ps -ef
+netstat -tulpen
+```
+### Wichtige Dockerfile Anweisungen
+
+FROM        Base Image festlegen
+RUN         Befehle im Image ausführen
+COPY        Dateien ins Image kopieren
+ADD         Dateien oder URLs ins Image kopieren
+ENV         Umgebungsvariablen setzen
+EXPOSE      Port dokumentieren
+VOLUME      Persistente Daten definieren
+WORKDIR    Arbeitsverzeichnis setzen
+CMD         Standardbefehl beim Start
+ENTRYPOINT  Fixer Startbefehl
+HEALTHCHECK Container-Zustand prüfen
+
+## Netzwerk-Anbindung
+Container werden über Port-Mapping erreichbar gemacht.
+
+Beispiele:
+```bash
+docker run -d -p 8080:80 httpd
+docker run -d -P mysql
+```
+## Volumes
+Volumes ermöglichen persistente Daten über den Lebenszyklus eines Containers hinaus.
+
+Beispiele:
+```bash
+docker volume create myvolume
+docker run -it --rm -v myvolume:/data busybox sh
+```
+## Image-Bereitstellung
+Eigene Images können für andere bereitgestellt werden.
+
+### Image taggen
+```bash
+docker tag meinimage username/meinimage:1.0
+```
+### Image pushen (Docker Hub)
+```bash
+docker push username/meinimage:1.0
+```
+### Image exportieren / importieren
+```bash
+docker save meinimage -o meinimage.tar
+docker load -i meinimage.tar
+```
 Änderung:
 
 <title>M300 – Apache Webserver</title>
