@@ -149,13 +149,160 @@ http://127.0.0.1:8080
 ```
 
 Die Apache-Standardseite wird angezeigt.
-S
-![Apachestandartfoto]("C:\Users\Hans\OneDrive - Berufsbildungszentrum Schaffhausen\Bilder\Screenshots\Screenshot 2026-02-09 130507.png")
 
-7. HTML-Titel anpassen
+![Apachestandartfoto](images/Apache.png)
+
+1. HTML-Titel anpassen
 ```bash
 sudo nano /var/www/html/index.html
 ```
+
+# LB 3 – Docker Hands-on
+
+## 1. Umgebung funktionsfähig auf eigenem Notebook
+
+Docker wurde nativ auf dem eigenen Notebook installiert (Docker Desktop).
+
+Die Funktionsfähigkeit der Docker-Umgebung wurde mit folgendem Befehl überprüft:
+
+docker run hello-world
+
+Die erfolgreiche Ausgabe bestätigt, dass Docker korrekt installiert und lauffähig ist.
+
+
+## 2. Bestehende Docker Container kombinieren (Frontend & Backend)
+
+Ziel ist die Kombination eines Backends (Datenbank) mit einem Frontend (Web-Applikation).
+
+Verwendete Container:
+- Backend: mysql:5.7
+- Frontend: ghost:1-alpine
+- Datenbankverwaltung: adminer
+
+### Docker Netzwerk erstellen
+```bash
+docker network create lb3net
+```
+
+### MySQL Container starten (Backend)
+```bash
+docker run -d --name ghost_mysql --network lb3net \
+  -e MYSQL_ROOT_PASSWORD=admin \
+  -e MYSQL_USER=ghost \
+  -e MYSQL_PASSWORD=secret \
+  -e MYSQL_DATABASE=ghost \
+  mysql:5.7
+```
+
+### Ghost Container starten (Frontend)
+```bash
+docker run -d --name ghost --network lb3net \
+  -e database__client=mysql \
+  -e database__connection__host=ghost_mysql \
+  -e database__connection__user=ghost \
+  -e database__connection__password=secret \
+  -e database__connection__database=ghost \
+  -p 2368:2368 \
+  ghost:1-alpine
+```
+
+### Adminer starten (Datenbankverwaltung)
+```bash
+docker run -d --name adminer --network lb3net -p 8082:8080 adminer
+```
+
+### Funktionstest
+
+Ghost Webinterface:
+http://localhost:2368
+![Ghostwebfoto](images/ghost.png)
+Adminer Webinterface:
+http://localhost:8082
+![Adminerfoto](images/Adminer.png)
+Status prüfen:
+```bash
+docker ps
+```
+
+## 3. Eigener Docker Container erstellen (Dockerfile)
+
+Für den eigenen Container wurde ein Dockerfile erstellt, welches einen Apache-Webserver enthält.
+Dies stellt die Umwandlung eines Vagrantfiles in ein Dockerfile dar.
+
+### Dockerfile
+
+FROM ubuntu:22.04
+```bash
+RUN apt-get update && \
+    apt-get -y install apache2 curl && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+ENV APACHE_RUN_USER=www-data
+ENV APACHE_RUN_GROUP=www-data
+ENV APACHE_LOG_DIR=/var/log/apache2
+
+RUN mkdir -p /var/lock/apache2 /var/run/apache2
+
+EXPOSE 80
+VOLUME /var/www/html
+
+HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+  CMD curl -fs http://localhost/ || exit 1
+
+CMD ["/bin/bash", "-c", "source /etc/apache2/envvars && exec /usr/sbin/apache2 -DFOREGROUND"]
+```
+
+### Docker Image erstellen
+```bash
+docker build -t puh .
+```
+
+### Container starten
+```bash
+docker run -d --name puh_container -p 8080:80 puh
+```
+
+### Funktionstest
+```bash
+curl http://localhost:8080
+```
+oder im Browser:
+http://localhost:8080
+
+
+## 4. Container sichern und beschränken (Ressourcenlimits)
+
+Um sicherzustellen, dass Container nicht unbeschränkt Systemressourcen beanspruchen,
+wurden CPU- und RAM-Limits gesetzt.
+
+### Container mit Limits starten
+```bash
+docker run -d --name puh_container -p 8080:80 \
+  --memory=256m --cpus=0.5 --pids-limit=100 \
+  puh
+```
+
+### Kontrolle der Limits
+```bash
+docker stats --no-stream
+```
+
+## 5. Health Check
+
+Im Dockerfile wurde ein HEALTHCHECK definiert, welcher regelmässig prüft,
+ob der Apache-Webserver erreichbar ist.
+
+
+## Fazit
+
+- Docker Umgebung erfolgreich eingerichtet
+- Frontend und Backend Container kombiniert
+- Eigener Docker Container mittels Dockerfile erstellt
+- Ressourcenbeschränkungen implementiert
+- Healthcheck integriert
+
+Alle Anforderungen von LB 3 hands-on wurden vollständig erfüllt.
+
 Änderung:
 
 <title>M300 – Apache Webserver</title>
