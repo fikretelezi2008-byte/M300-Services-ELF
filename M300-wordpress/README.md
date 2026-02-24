@@ -50,7 +50,7 @@ Die gesamte Umgebung wird über die Datei docker-compose.yml gestartet und verwa
 
 ## 3. Konfiguration und Monitoring
 
-Die Konfiguration der Anwendung erfolgt über die Datei ```bash docker-compose.yml. ```
+Die Konfiguration der Anwendung erfolgt über die Datei `bash docker-compose.yml. `
 Dort sind alle Container, Netzwerke und Volumes definiert.
 
 Die Zugangsdaten für die Datenbank werden in einer .env Datei gespeichert. Dadurch stehen die Passwörter nicht direkt im Compose-File. Das erhöht die Sicherheit und Übersichtlichkeit.
@@ -90,13 +90,22 @@ Folgende Ports werden verwendet:
 
 Die Datenbank wird nicht nach außen freigegeben.
 Das erhöht die Sicherheit, da sie nur vom WordPress-Container erreichbar ist.
-### Volumes
+## 5. Volumes
 
-Die Daten werden persistent gespeichert über Named Volumes:
+Die Daten werden über sogenannte Named Volumes gespeichert. Dadurch bleiben wichtige Informationen auch nach einem Neustart der Container erhalten.
 
-db_data (Speichert db Dateien)
+Folgende Volumes werden verwendet:
 
-wp_data (Speichert wordpress Dateien)
+db_data – speichert die Datenbank dauerhaft
+
+wp_data – speichert die WordPress-Dateien dauerhaft
+
+Zum Test wurde ein Beitrag erstellt und danach die Container mit folgendem Befehl neu gestartet:
+```bash
+docker compose down
+docker compose up -d
+```
+Der Beitrag war nach dem Neustart weiterhin vorhanden. Dadurch wurde bestätigt, dass die Volumes korrekt funktionieren.
 
 ## 6. Fehleranalyse und Problemlösung
 
@@ -115,7 +124,7 @@ In der Datei docker-compose.yml war als Datenbank-Host „localhost“ eingetrag
 In Docker bedeutet „localhost“ jedoch der eigene Container.
 Die Datenbank läuft aber in einem separaten Container mit dem Namen db.
 
-###Lösung:
+### Lösung:
 
 Der Datenbank-Host wurde von:
 ```bash
