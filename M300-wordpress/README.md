@@ -2,9 +2,7 @@
 
 ## 1. Dienstleistungskonzept
 
-### Zweck der Dienstleistung
-
-Dienstleistungskonzept
+### Dienstleistungskonzept
 
 In diesem Projekt wurde eine Webhosting-Lösung mit Docker umgesetzt. Ziel ist es, eine Website für ein kleines oder mittleres Unternehmen bereitzustellen. Als Webanwendung wird WordPress verwendet, da es ein bekanntes und einfach zu bedienendes System für Websites ist.
 
@@ -137,3 +135,7 @@ db:3306
 geändert.
 
 Nach dem Neustart der Container funktionierte die Verbindung zur Datenbank wieder korrekt.
+
+## 7. Fazit
+
+In diesem Projekt wurde erfolgreich eine containerisierte Webhosting-Lösung umgesetzt. Die Anwendung läuft stabil in mehreren Containern und kann jederzeit neu gestartet oder auf ein anderes System übertragen werden. Durch Monitoring und Fehleranalyse wurde die Funktionsfähigkeit der Lösung überprüft.
