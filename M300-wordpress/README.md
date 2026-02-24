@@ -48,7 +48,7 @@ Zusätzlich werden sogenannte Volumes verwendet. Diese sorgen dafür, dass wicht
 
 Die gesamte Umgebung wird über die Datei docker-compose.yml gestartet und verwaltet. Mit einem einzigen Befehl können alle Container gleichzeitig gestartet oder gestoppt werden.
 
-# 3. Konfiguration und Monitoring
+## 3. Konfiguration und Monitoring
 
 Die Konfiguration der Anwendung erfolgt über die Datei ```bash docker-compose.yml. ```
 Dort sind alle Container, Netzwerke und Volumes definiert.
@@ -76,16 +76,17 @@ http://localhost:8080
 
 Dadurch kann überprüft werden, ob die Container korrekt laufen und wie viele Ressourcen sie verwenden.
 
-# 4. Netzwerk und Ports
+## 4. Netzwerk und Ports
 
 Die Container sind über ein eigenes Docker-Bridge-Netzwerk miteinander verbunden. Dadurch können sie intern miteinander kommunizieren.
 
 Folgende Ports werden verwendet:
 
-Dienst	Externer Port	Interner Port	Zweck
-WordPress	8081	80	Zugriff auf die Website
-cAdvisor	8080	8080	Monitoring
-MariaDB	-	3306	Nur intern erreichbar
+| Dienst    | Externer Port | Interner Port | Zweck                 |
+| --------- | ------------- | ------------- | --------------------- |
+| WordPress | 8081          | 80            | Zugriff auf Website   |
+| cAdvisor  | 8080          | 8080          | Monitoring            |
+| MariaDB   | -             | 3306          | Nur intern erreichbar |
 
 Die Datenbank wird nicht nach außen freigegeben.
 Das erhöht die Sicherheit, da sie nur vom WordPress-Container erreichbar ist.
@@ -96,3 +97,34 @@ Die Daten werden persistent gespeichert über Named Volumes:
 db_data (Speichert db Dateien)
 
 wp_data (Speichert wordpress Dateien)
+
+## 6. Fehleranalyse und Problemlösung
+
+Während der Umsetzung trat ein typisches Problem auf.
+
+
+-Nach dem Start der Container konnte WordPress keine Verbindung zur Datenbank herstellen.
+Im Browser erschien die Meldung:
+```bash
+Error establishing a database connection
+```
+### Ursache:
+
+In der Datei docker-compose.yml war als Datenbank-Host „localhost“ eingetragen.
+
+In Docker bedeutet „localhost“ jedoch der eigene Container.
+Die Datenbank läuft aber in einem separaten Container mit dem Namen db.
+
+###Lösung:
+
+Der Datenbank-Host wurde von:
+```bash
+localhost
+```
+zu:
+```bash
+db:3306
+```
+geändert.
+
+Nach dem Neustart der Container funktionierte die Verbindung zur Datenbank wieder korrekt.
