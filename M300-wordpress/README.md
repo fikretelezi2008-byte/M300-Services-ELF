@@ -65,6 +65,13 @@ Die Container werden mit folgendem Befehl gestartet:
 ```bash 
 docker compose up -d
 ```
+
+Dann zum überprüfen folgenden befehl ausführen:
+```bash
+docker ps
+```
+So sollte es dann aussehen:
+
 ![DockerPsbefehl](images/Dockerps.png)
 
 Zur Überwachung der Container wird cAdvisor eingesetzt.
@@ -84,14 +91,18 @@ Das Monitoring ist unter folgender Adresse erreichbar:
 http://localhost:8080
 
 Dadurch kann überprüft werden, ob die Container korrekt laufen und wie viele Ressourcen sie verwenden.
+![Cadvisor](images/cAdvisor2.png)
 
 ### Ressourcenoptimierung
 
 Standardmässig dürfen Docker-Container unbegrenzt CPU und RAM verwenden. Um das Hostsystem zu schützen, wurden für den WordPress-Container Ressourcenlimits definiert.
 
 Der Container wurde auf 512 MB RAM und 0.5 CPU begrenzt. Dadurch wird verhindert, dass ein einzelner Service zu viele Systemressourcen beansprucht.
+![Ressourcendockercompose](Ressourcen.png)
 
 Die Begrenzung wurde mit dem Befehl docker stats überprüft.
+
+![Ressource](Ressourcen2.png)
 
 ## 4. Netzwerk und Ports
 
@@ -122,7 +133,12 @@ Zum Test wurde ein Beitrag erstellt und danach die Container mit folgendem Befeh
 docker compose down
 docker compose up -d
 ```
+
+![Wordpress](Wordpresstestbeitrag.png)
+
 Der Beitrag war nach dem Neustart weiterhin vorhanden. Dadurch wurde bestätigt, dass die Volumes korrekt funktionieren.
+
+![Wordpresstest](Wordpresstestbeitrag2.png)
 
 ## 6. Fehleranalyse und Problemlösung
 
@@ -134,6 +150,9 @@ Im Browser erschien die Meldung:
 ```bash
 Error establishing a database connection
 ```
+
+![WordpressFehler](Databasefehler.png)
+
 ### Ursache:
 
 In der Datei docker-compose.yml war als Datenbank-Host „localhost“ eingetragen.
@@ -160,6 +179,8 @@ zu:
 db:3306
 ```
 geändert.
+
+![Wordpressfehler2](fehler.png)
 
 Nach dem Neustart der Container funktionierte die Verbindung zur Datenbank wieder korrekt.
 

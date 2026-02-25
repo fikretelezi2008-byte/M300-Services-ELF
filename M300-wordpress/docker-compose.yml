@@ -17,6 +17,8 @@ services:
     image: wordpress:6-apache
     container_name: m300-wp-app
     restart: unless-stopped
+    mem_limit: 512m
+    cpus: 0.5
     depends_on:
       - db
     ports:
