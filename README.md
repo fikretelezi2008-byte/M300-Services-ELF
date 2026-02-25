@@ -824,11 +824,11 @@ Nun erscheint der Bildschirm:
 
 „Jenkins entsperren“
 
-![Jenkins](images/Jenkins.png)
+![Jenkins](images/jenkins.png)
 
 3. Initial Admin Passwort holen
 
-Im Terminal erscheint automatisch das Passwort.
+Im Terminal erscheint automatisch das Passwort
 
 Falls nicht sichtbar:
 ```bash
