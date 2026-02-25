@@ -98,11 +98,25 @@ Dadurch kann überprüft werden, ob die Container korrekt laufen und wie viele R
 Standardmässig dürfen Docker-Container unbegrenzt CPU und RAM verwenden. Um das Hostsystem zu schützen, wurden für den WordPress-Container Ressourcenlimits definiert.
 
 Der Container wurde auf 512 MB RAM und 0.5 CPU begrenzt. Dadurch wird verhindert, dass ein einzelner Service zu viele Systemressourcen beansprucht.
+
 ![Ressourcendockercompose](images/Ressourcen.png)
 
 Die Begrenzung wurde mit dem Befehl docker stats überprüft.
 
 ![Ressource](images/Ressourcen2.png)
+
+### Startreihenfolge der Container
+
+Der WordPress-Container ist abhängig vom Datenbank-Container.
+Mit folgendem befehl wird sichergestellt, dass die Datenbank vor WordPress gestartet wird.
+```bash
+depends_on
+- db
+```
+
+Dadurch wird verhindert, dass WordPress versucht, sich mit einer noch nicht gestarteten Datenbank zu verbinden.
+
+![Dependency](images/Dependency.png)
 
 ## 4. Netzwerk und Ports
 
