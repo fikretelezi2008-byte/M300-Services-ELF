@@ -19,10 +19,10 @@ Zusätzlich wird mit cAdvisor ein Monitoring eingesetzt. Damit kann überprüft 
 
  Viele KMU benötigen:
 
--eine kostengünstige Website
--einfache Wartung
--Datensicherheit
--schnelle Wiederherstellung bei Fehlern
+- eine kostengünstige Website
+- einfache Wartung
+- Datensicherheit
+- schnelle Wiederherstellung bei Fehlern
 
 Durch Docker kann die gesamte Umgebung reproduzierbar bereitgestellt werden.
 
@@ -74,10 +74,10 @@ So sollte es dann aussehen:
 Zur Überwachung der Container wird cAdvisor eingesetzt.
 cAdvisor zeigt die Nutzung von:
 
--CPU
--Arbeitsspeicher (RAM)
--Netzwerk
--Container-Status
+- CPU
+- Arbeitsspeicher (RAM)
+- Netzwerk
+- Container-Status
 Das Monitoring ist unter folgender Adresse erreichbar:
 
 
