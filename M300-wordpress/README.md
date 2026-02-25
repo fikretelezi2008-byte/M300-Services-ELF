@@ -14,6 +14,7 @@ Damit keine Daten verloren gehen, werden sogenannte Volumes verwendet. Diese spe
 
 Zusätzlich wird mit cAdvisor ein Monitoring eingesetzt. Damit kann überprüft werden, wie viel CPU und Arbeitsspeicher die Container verwenden.
 
+
 ### Warum diese Lösung?
 
  Viele KMU benötigen:
@@ -46,6 +47,13 @@ Zusätzlich werden sogenannte Volumes verwendet. Diese sorgen dafür, dass wicht
 
 Die gesamte Umgebung wird über die Datei docker-compose.yml gestartet und verwaltet. Mit einem einzigen Befehl können alle Container gleichzeitig gestartet oder gestoppt werden.
 
+Die Container kommunizieren über ein eigenes Docker-Bridge-Netzwerk.
+Docker stellt dabei ein internes DNS-System zur Verfügung, wodurch sich die Container über ihren Servicenamen z.b. db erreichen können.
+
+Die Datenbank habe ich absichtlich nicht nach außen veröffentlicht, um die Sicherheit zu erhöhen. Dadurch kann nur der WordPress-Container auf die Datenbank zugreifen.
+
+Diese Architektur sorgt für Isolation, Stabilität und eine klare Trennung der Dienste.
+
 ## 3. Konfiguration und Monitoring
 
 Die Konfiguration der Anwendung erfolgt über die Datei `bash docker-compose.yml. `
@@ -57,6 +65,8 @@ Die Container werden mit folgendem Befehl gestartet:
 ```bash 
 docker compose up -d
 ```
+![DockerPsbefehl](images/Dockerps.png)
+
 Zur Überwachung der Container wird cAdvisor eingesetzt.
 cAdvisor zeigt die Nutzung von:
 
@@ -70,9 +80,18 @@ cAdvisor zeigt die Nutzung von:
 
 Das Monitoring ist unter folgender Adresse erreichbar:
 
+
 http://localhost:8080
 
 Dadurch kann überprüft werden, ob die Container korrekt laufen und wie viele Ressourcen sie verwenden.
+
+### Ressourcenoptimierung
+
+Standardmässig dürfen Docker-Container unbegrenzt CPU und RAM verwenden. Um das Hostsystem zu schützen, wurden für den WordPress-Container Ressourcenlimits definiert.
+
+Der Container wurde auf 512 MB RAM und 0.5 CPU begrenzt. Dadurch wird verhindert, dass ein einzelner Service zu viele Systemressourcen beansprucht.
+
+Die Begrenzung wurde mit dem Befehl docker stats überprüft.
 
 ## 4. Netzwerk und Ports
 
@@ -121,6 +140,14 @@ In der Datei docker-compose.yml war als Datenbank-Host „localhost“ eingetrag
 
 In Docker bedeutet „localhost“ jedoch der eigene Container.
 Die Datenbank läuft aber in einem separaten Container mit dem Namen db.
+
+Zur weiteren Analyse wurden die Docker-Logs überprüft:
+
+docker compose logs wordpress
+
+In den Logs konnte man sehen, dass keine Verbindung zur Datenbank aufgebaut werden konnte. Dadurch konnte ich den fehler finden und beheben.
+
+
 
 ### Lösung:
 
