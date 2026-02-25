@@ -98,11 +98,11 @@ Dadurch kann überprüft werden, ob die Container korrekt laufen und wie viele R
 Standardmässig dürfen Docker-Container unbegrenzt CPU und RAM verwenden. Um das Hostsystem zu schützen, wurden für den WordPress-Container Ressourcenlimits definiert.
 
 Der Container wurde auf 512 MB RAM und 0.5 CPU begrenzt. Dadurch wird verhindert, dass ein einzelner Service zu viele Systemressourcen beansprucht.
-![Ressourcendockercompose](Ressourcen.png)
+![Ressourcendockercompose](images/Ressourcen.png)
 
 Die Begrenzung wurde mit dem Befehl docker stats überprüft.
 
-![Ressource](Ressourcen2.png)
+![Ressource](images/Ressourcen2.png)
 
 ## 4. Netzwerk und Ports
 
@@ -134,11 +134,11 @@ docker compose down
 docker compose up -d
 ```
 
-![Wordpress](Wordpresstestbeitrag.png)
+![Wordpress](images/Wordpresstestbeitrag.png)
 
 Der Beitrag war nach dem Neustart weiterhin vorhanden. Dadurch wurde bestätigt, dass die Volumes korrekt funktionieren.
 
-![Wordpresstest](Wordpresstestbeitrag2.png)
+![Wordpresstest](images/Wordpresstestbeitrag2.png)
 
 ## 6. Fehleranalyse und Problemlösung
 
@@ -151,7 +151,7 @@ Im Browser erschien die Meldung:
 Error establishing a database connection
 ```
 
-![WordpressFehler](Databasefehler.png)
+![WordpressFehler](images/Databasefehler.png)
 
 ### Ursache:
 
@@ -180,7 +180,7 @@ db:3306
 ```
 geändert.
 
-![Wordpressfehler2](fehler.png)
+![Wordpressfehler2](images/fehler.png)
 
 Nach dem Neustart der Container funktionierte die Verbindung zur Datenbank wieder korrekt.
 
