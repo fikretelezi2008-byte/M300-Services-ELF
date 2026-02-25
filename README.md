@@ -889,7 +889,7 @@ Im Terminal prüfen:
 docker image ls
 ```
 
-Es sollten mehrere Images sichtbar sein (z. B. scsesi_order, scsesi_common, scsesi_varnish).
+Es sollten mehrere Images sichtbar sein (z.b. scsesi_order, scsesi_common, scsesi_varnish).
 
 10. Anwendung testen
 ```bash
