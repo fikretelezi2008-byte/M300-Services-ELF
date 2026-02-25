@@ -448,3 +448,263 @@ docker load -i meinimage.tar
 <title>M300 – Apache Webserver</title>
 <h1>Apache Webserver – Modul 300</h1>
 <p>Erstellt von Fikret</p>
+
+# 35 Container-Sicherheit
+
+Dieses Kapitel beschreibt die Absicherung, Überwachung und Automatisierung von Docker-Containern in produktiven Umgebungen. Ziel ist es, Container stabil, kontrollierbar und gegen typische Angriffe wie DoS, Container-Breakouts oder Ressourcenüberlastung zu schützen.
+
+## 1. Protokollieren & Überwachen
+Logging
+
+Docker speichert standardmässig alle Ausgaben, die über STDOUT und STDERR erfolgen. Diese Logs sind essenziell für:
+
+- Fehleranalyse
+- Debugging
+- Nachvollziehbarkeit von Systemzuständen
+- Ursachenanalyse bei Abstürzen
+
+Logs anzeigen
+```bash
+docker logs <container>
+``` 
+
+Warum?
+Mit diesem Befehl können Container-Ausgaben nachträglich eingesehen werden. Das ist besonders wichtig, da Container kurzlebig sind und Fehler sonst nicht mehr nachvollziehbar wären.
+
+Logs live verfolgen
+```bash
+docker logs -f <container>
+```
+
+Warum?
+Damit kann man Echtzeit-Logs beobachten, z. B. bei Tests oder beim Debuggen von Startproblemen.
+
+Logging-Treiber ändern
+```bash
+docker run --log-driver=syslog ubuntu
+```
+
+Warum?
+Mit dem syslog-Treiber werden Logs zentral im Host-System gespeichert. Das ist sinnvoll in produktiven Umgebungen, damit Logs nicht verloren gehen, wenn Container gelöscht werden.
+
+### Monitoring
+
+Neben Logging ist Monitoring wichtig, um Systemressourcen zu kontrollieren.
+
+Ressourcen überwachen
+```bash
+docker stats
+```
+
+Warum?
+Dieser Befehl zeigt CPU-, RAM- und Netzwerkverbrauch aller laufenden Container. Damit können:
+
+- Speicherlecks erkannt werden
+- Überlastungen vermieden werden
+- DoS-Angriffe frühzeitig erkannt werden
+
+### cAdvisor einsetzen
+```bash
+docker run -d --name cadvisor \
+-v /:/rootfs:ro \
+-v /var/run:/var/run:rw \
+-v /sys:/sys:ro \
+-v /var/lib/docker/:/var/lib/docker:ro \
+-p 8080:8080 \
+google/cadvisor:latest
+``` 
+
+Warum?
+cAdvisor bietet eine grafische Oberfläche zur Überwachung der Container-Performance.
+Dies erleichtert die visuelle Analyse von CPU-, RAM- und Netzwerkverbrauch.
+
+## 1. Container sichern & beschränken
+
+Da Container den Kernel des Hosts teilen, ist Sicherheit besonders wichtig.
+
+Container nicht als root betreiben
+Dockerfile:
+```bash
+RUN groupadd -r appuser && useradd -r -g appuser appuser
+USER appuser
+```
+
+Warum?
+Wenn ein Container als root läuft und kompromittiert wird, kann ein Angreifer unter Umständen Root-Rechte auf dem Host erlangen.
+Das Prinzip Least Privilege reduziert dieses Risiko erheblich.
+
+Speicher begrenzen
+```bash
+docker run -m 128m nginx
+```
+
+Warum?
+Begrenzt den RAM-Verbrauch des Containers.
+Schützt vor:
+
+- Speicherlecks
+- DoS-Angriffen
+- Überlastung des Hosts
+
+CPU begrenzen
+```bash
+docker run -c 512 nginx
+```
+
+Warum?
+Verhindert, dass ein einzelner Container die gesamte CPU-Zeit beansprucht.
+Erhöht die Systemstabilität bei mehreren Containern.
+
+Restart-Policy setzen
+```bash
+docker run --restart=on-failure:5 nginx
+```
+
+Warum?
+Verhindert Endlosschleifen bei abstürzenden Containern.
+Schützt das System vor unnötiger Ressourcenbelastung.
+
+Read-Only Filesystem
+```bash
+docker run --read-only ubuntu
+```
+
+Warum?
+Verhindert Schreibzugriffe im Container-Dateisystem.
+Schützt vor Manipulation von Dateien oder Schadcode.
+
+Capabilities einschränken
+```bash
+docker run --cap-drop all ubuntu
+```
+
+Warum?
+Reduziert Kernel-Berechtigungen und minimiert die Angriffsfläche.
+
+ulimit setzen
+```bash
+docker run --ulimit nproc=100 nginx
+```
+
+Warum?
+Begrenzt die Anzahl der Prozesse.
+Schützt vor sogenannten Fork-Bomben (DoS-Angriff).
+
+## 3. Kontinuierliche Integration (CI)
+
+CI automatisiert Builds und Tests, um Fehler frühzeitig zu erkennen.
+
+Jenkins Blue Ocean starten
+```bash
+docker run \
+--rm \
+-u root \
+-p 8082:8080 \
+-v jenkins-data:/var/jenkins_home \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v "$HOME":/home \
+jenkinsci/blueocean
+```
+Warum?
+Startet Jenkins als Container, um:
+
+- Automatische Builds durchzuführen
+- Docker-Images zu erstellen
+- Tests auszuführen
+- Softwarequalität sicherzustellen
+
+### Aufgetretener Fehler und Lösung
+
+Während der Durchführung trat folgender Fehler auf:
+
+Problem
+
+Beim Starten eines Containers mit Ressourcenbegrenzung erhielt ich eine Fehlermeldung, dass der Container nicht gestartet werden konnte.
+
+Ursache:
+
+Falsche Syntax beim docker run Befehl
+
+Bereits belegter Port
+
+Lösung
+
+Befehl überprüft und Syntax korrigiert
+
+Mit folgendem Befehl laufende Container überprüft:
+```bash
+docker ps
+```
+
+Konflikt-Container gestoppt:
+```bash
+docker stop <container>
+```
+
+Port-Konflikt behoben oder neuen Port gewählt:
+```bash
+docker run -p 8081:8080 nginx
+```
+
+Nach der Korrektur funktionierte der Container wie erwartet.
+
+Fazit
+
+Die wichtigsten Sicherheitsmassnahmen für Docker-Container sind:
+
+- Zentrales Logging
+- Monitoring der Ressourcen
+- Least Privilege Prinzip
+- RAM- und CPU-Limits
+- Restart-Policies
+- Reduktion von Kernel-Capabilities
+- Einsatz von CI/CD zur Qualitätskontrolle
+
+Durch diese Massnahmen kann ein Docker-System stabil, sicher und produktionsreif betrieben werden.
+
+## Fragen
+
+
+### Protokollieren & Überwachen
+
+Warum sollten Container überwacht werden?
+
+   - Um Fehler oder grosse Ressourcenbelastungen frühzeitig zu erkennen und einzugreifen	
+
+Was ist das syslog und wo ist es zu finden?
+
+	 - Das Systemweite Log eines Linux Hosts. Verzeichnis /var/log.
+
+Was ist stdout, stderr, stdin?
+
+	 -Standard Output, Standard Error Ausgabe und Standard Input Eingabe. 	
+
+
+### Container sichern & beschränken
+
+Wie kann `docker run -v /:/homeroot -it ubuntu bash` durch Normale User verhindert werden?
+  
+	 	- nur `root` darf Container starten
+
+Wie können verschiedene Mandanten getrennt werden?
+
+	 	- Mittels VM's
+
+Wie kann der Ressourcenverbrauch von Containern eingeschränkt werden?
+
+	 - https://docs.docker.com/config/containers/resource_constraints/#configure-the-default-cfs-scheduler 
+
+### Kontinuierliche Integration
+
+Welche Funktionen kann Jenkins übernehmen?
+
+	 	- CI, Modultests, Software bauen, Batch Jobs ausführen - z.B. Logs überprüfen
+
+Wie baut man Modultests?
+
+	 	- Via Bash Scripts
+
+Wie anders, als Manuell oder Zeitgesteuert könnten Jenkins Jobs auch gestartet werden?
+
+	 	- Durch Änderungen in einem Git Repository
+
