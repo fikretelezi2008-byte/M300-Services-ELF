@@ -708,3 +708,82 @@ Wie anders, als Manuell oder Zeitgesteuert könnten Jenkins Jobs auch gestartet 
 
 	 	- Durch Änderungen in einem Git Repository
 
+80 - Kubernetes – Einführung und Cluster
+
+Dieses Kapitel gibt eine Einführung in Kubernetes und zeigt, wie ein einfacher Kubernetes-Cluster aufgebaut wird. Ziel ist es, Container-Anwendungen nicht nur einzeln zu starten, sondern zentral zu verwalten, zu skalieren und hochverfügbar zu betreiben.
+
+### Grundbegriffe
+Service Discovery
+
+Service Discovery beschreibt den Prozess, wie Anwendungen andere Services im Netzwerk automatisch finden. In verteilten Systemen ändern sich IP-Adressen und Instanzen ständig. Kubernetes löst dieses Problem, indem Services über Namen erreichbar sind und automatisch auf verfügbare Pods weiterleiten.
+
+Load Balancing
+
+Load Balancing bedeutet Lastverteilung. Anfragen werden auf mehrere Container verteilt, damit kein einzelner Container überlastet wird. Dadurch wird die Performance verbessert und die Verfügbarkeit erhöht.
+
+Cluster
+
+Ein Cluster ist ein Verbund mehrerer Rechner (Nodes), die gemeinsam arbeiten.
+In Kubernetes besteht ein Cluster typischerweise aus:
+
+- einem Master (Steuerungseinheit)
+- mehreren Worker Nodes (führen Container aus)
+
+Ziel eines Clusters ist:
+
+- höhere Verfügbarkeit
+- bessere Skalierbarkeit
+- zentrale Verwaltung
+
+### Kubernetes
+
+Kubernetes (K8s) ist ein Open-Source-System zur Orchestrierung von Container-Anwendungen. Es automatisiert:
+
+- Bereitstellung von Containern
+- Skalierung
+- Updates
+- Neustarts bei Abstürzen
+- Lastverteilung
+
+Kubernetes arbeitet deklarativ. Das bedeutet:
+Man beschreibt den gewünschten Zustand (z. B. „3 Instanzen dieser Anwendung“), und Kubernetes sorgt automatisch dafür, dass dieser Zustand erreicht und gehalten wird.
+
+### Wichtige Kubernetes-Objekte
+
+Pod
+Kleinste Einheit in Kubernetes. Ein Pod enthält einen oder mehrere Container und teilt sich IP-Adresse und Speicher.
+
+ReplicaSet
+Stellt sicher, dass eine bestimmte Anzahl von Pods gleichzeitig läuft.
+
+Deployment
+Erweitert ReplicaSets und ermöglicht Updates von Anwendungen (z. B. Version 1.0 auf 1.1).
+
+Service
+Erstellt eine stabile IP-Adresse und ermöglicht Zugriff auf Pods, auch wenn diese neu gestartet oder ersetzt werden.
+
+Ingress
+Erlaubt externen Zugriff über eine URL (ähnlich wie ein Reverse Proxy).
+
+### Kubernetes Cluster
+
+Ein Kubernetes-Cluster besteht aus:
+
+- 1 Master Node
+- mehreren Worker Nodes
+
+Der Master verwaltet:
+
+- Planung der Pods
+- Kommunikation
+- Cluster-Zustand
+
+Die Worker Nodes führen die Container aus.
+
+In der Konfiguration wird festgelegt:
+
+- Anzahl Master
+- Anzahl Worker
+- CPU und RAM
+- Netzwerktyp (private oder public network)
+
