@@ -787,3 +787,115 @@ In der Konfiguration wird festgelegt:
 - CPU und RAM
 - Netzwerktyp (private oder public network)
 
+##Jenkins mit Docker einrichten (Blue Ocean)
+
+
+
+### 1. Jenkins Container starten
+
+Im Terminal folgenden Befehl ausführen:
+
+```bash
+docker run \
+--rm \
+-u root \
+-p 8082:8080 \
+-v jenkins-data:/var/jenkins_home \
+-v /var/run/docker.sock:/var/run/docker.sock \
+-v "$HOME":/home \
+jenkinsci/blueocean
+```
+
+Erklärung der Parameter
+Parameter	Bedeutung
+- p 8082:8080	Port 8082 auf Host → 8080 im Container
+- v jenkins-data:/var/jenkins_home	Persistente Speicherung der Jenkins-Daten
+- v /var/run/docker.sock:/var/run/docker.sock	Jenkins darf Docker-Befehle ausführen
+- -rm	Container wird beim Stoppen entfernt
+- u root	Jenkins läuft mit Root-Rechten (für Docker Zugriff notwendig)
+
+### 2. Jenkins im Browser öffnen
+
+Im Browser öffnen:
+
+http://localhost:8082
+
+Nun erscheint der Bildschirm:
+
+„Jenkins entsperren“
+
+![Jenkins](images/Jenkins.png)
+
+3. Initial Admin Passwort holen
+
+Im Terminal erscheint automatisch das Passwort.
+
+Falls nicht sichtbar:
+```bash
+docker exec -it <container_id> cat /var/jenkins_home/secrets/initialAdminPassword
+```
+
+Oder direkt im laufenden Terminal ablesen.
+
+Dieses Passwort in das Feld Administrator Passwort einfügen und auf Weiter klicken.
+
+4. Plugins installieren
+
+Option wählen:
+
+Install suggested plugins
+
+Warten bis Installation abgeschlossen ist.
+
+5. Admin Benutzer erstellen
+
+- Benutzername
+- Passwort
+- E-Mail
+- Erstellen und fortfahren.
+
+6. Blue Ocean starten
+
+Nach dem Login:
+
+Rechts oben auf Open Blue Ocean klicken.
+
+7. Pipeline erstellen
+
+Create Pipeline
+
+Git auswählen
+
+Repository eingeben:
+
+https://github.com/mc-b/SCS-ESI
+
+Create Pipeline
+
+Jenkins erkennt automatisch das Jenkinsfile im Repository.
+
+8. Build ausführen
+
+Jenkins führt automatisch aus:
+
+- Build
+- Docker Image Erstellung
+- Pipeline Stages
+
+9. Images prüfen
+
+Im Terminal prüfen:
+```bash
+docker image ls
+```
+
+Es sollten mehrere Images sichtbar sein (z. B. scsesi_order, scsesi_common, scsesi_varnish).
+
+10. Anwendung testen
+```bash
+docker run -p 8081:8080 -d misegr/scsesi_order
+```
+
+Im Browser:
+
+http://localhost:8081
